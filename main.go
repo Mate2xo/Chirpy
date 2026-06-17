@@ -23,7 +23,7 @@ func initMux() *http.ServeMux {
 }
 
 func registerRoutes(mux *http.ServeMux) {
-	mux.Handle("/{$}", root())
+	mux.Handle("/", root())
 }
 
 func root() http.Handler {
