@@ -23,9 +23,16 @@ func initMux() *http.ServeMux {
 }
 
 func registerRoutes(mux *http.ServeMux) {
-	mux.Handle("/", root())
+	mux.Handle("/app/", fileRoot())
+	mux.HandleFunc("/healthz", healthz)
 }
 
-func root() http.Handler {
-	return http.FileServer(http.Dir("."))
+func fileRoot() http.Handler {
+	return http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
+}
+
+func healthz(w http.ResponseWriter, req *http.Request) {
+	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(200)
+	w.Write([]byte(http.StatusText(200)))
 }
