@@ -19,15 +19,13 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 }
 
 func (cfg *apiConfig) metrics(w http.ResponseWriter, _ *http.Request) {
-	fmt.Printf("hits are %v\n", cfg.fileserverHits.Load())
+	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(200)
+
 	_, err := fmt.Fprintf(w, "Hits: %v", cfg.fileserverHits.Load())
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func (cfg *apiConfig) reset(_ http.ResponseWriter, _ *http.Request) {
-	cfg.fileserverHits.Store(0)
 }
 
 func main() {
@@ -56,9 +54,3 @@ func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
 }
 
 var fileRoot = http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
-
-func healthz(w http.ResponseWriter, req *http.Request) {
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(200)
-	w.Write([]byte(http.StatusText(200)))
-}
