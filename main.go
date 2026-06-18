@@ -30,9 +30,11 @@ func initMux(cfg *apiConfig) *http.ServeMux {
 
 func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
 	mux.Handle("/app/", cfg.middlewareMetricsInc(fileRoot))
+
+	mux.HandleFunc("GET /admin/metrics", cfg.metrics)
+	mux.HandleFunc("POST /admin/reset", cfg.reset)
+
 	mux.HandleFunc("GET /api/healthz", healthz)
-	mux.HandleFunc("GET /api/metrics", cfg.metrics)
-	mux.HandleFunc("POST /api/reset", cfg.reset)
 }
 
 var fileRoot = http.StripPrefix("/app/", http.FileServer(http.Dir(".")))

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -14,11 +13,18 @@ func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 }
 
 func (cfg *apiConfig) metrics(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Add("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(200)
+	w.Header().Add("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
 
-	_, err := fmt.Fprintf(w, "Hits: %v", cfg.fileserverHits.Load())
-	if err != nil {
-		log.Fatal(err)
-	}
+	template := fmt.Sprintf(
+		`
+<html>
+  <body>
+    <h1>Welcome, Chirpy Admin</h1>
+    <p>Chirpy has been visited %d times!</p>
+  </body>
+</html>
+	`, cfg.fileserverHits.Load(),
+	)
+	w.Write([]byte(template))
 }
