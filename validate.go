@@ -4,13 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"regexp"
 )
+
+type validated struct {
+	CleanedBody string `json:"cleaned_body"`
+}
+type parameters struct {
+	Body string `json:"body"`
+}
 
 func validateChirp(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
-	type parameters struct {
-		Body string `json:"body"`
-	}
 	params := parameters{}
 
 	err := decoder.Decode(&params)
@@ -25,9 +30,20 @@ func validateChirp(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	respondWithJSON(validated{Valid: true}, http.StatusOK, w)
+	payload, err := removeBadWords(params)
+	if err != nil {
+		respondWithErr(err, http.StatusInternalServerError, w)
+	}
+
+	respondWithJSON(validated{CleanedBody: payload}, http.StatusOK, w)
 }
 
-type validated struct {
-	Valid bool `json:"valid"`
+func removeBadWords(params parameters) (string, error) {
+	re, err := regexp.Compile(`(?i)(kerfuffle|sharbert|fornax)[^!]`)
+	if err != nil {
+		return "", fmt.Errorf("error compiling regex: %w", err)
+	}
+
+	cleaned := re.ReplaceAll([]byte(params.Body), []byte("**** "))
+	return string(cleaned), nil
 }
