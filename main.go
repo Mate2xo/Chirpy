@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 
 	"github.com/Mate2xo/Chirpy/internal/database"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -19,6 +20,7 @@ type apiConfig struct {
 const port = "8080"
 
 func main() {
+	godotenv.Load()
 	cfg := &apiConfig{}
 	server := initServer(cfg)
 	db := initDB(cfg)
