@@ -16,14 +16,11 @@ type apiConfig struct {
 	dbQueries      *database.Queries
 }
 
+const port = "8080"
+
 func main() {
-	const port = "8080"
 	cfg := &apiConfig{}
-	mux := initMux(cfg)
-	server := http.Server{
-		Addr:    ":" + port,
-		Handler: mux,
-	}
+	server := initServer(cfg)
 	db := initDB(cfg)
 	defer db.Close()
 
@@ -31,10 +28,13 @@ func main() {
 	log.Fatal(server.ListenAndServe())
 }
 
-func initMux(cfg *apiConfig) *http.ServeMux {
+func initServer(cfg *apiConfig) http.Server {
 	mux := http.NewServeMux()
 	registerRoutes(mux, cfg)
-	return mux
+	return http.Server{
+		Addr:    ":" + port,
+		Handler: mux,
+	}
 }
 
 func initDB(cfg *apiConfig) *sql.DB {
