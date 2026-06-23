@@ -33,6 +33,32 @@ type chirpResponse struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type chirpsResponse struct {
+	elements []chirpResponse
+}
+
+func (cfg *apiConfig) chirps(w http.ResponseWriter, req *http.Request) {
+	chirps, err := cfg.dbQueries.AllChirps(req.Context())
+	if err != nil {
+		respondWithErr(err, http.StatusInternalServerError, w)
+	}
+
+	collection := chirpsResponse{}
+	for _, chirp := range chirps {
+		collection.elements = append(
+			collection.elements, chirpResponse{
+				ID:        chirp.ID,
+				Body:      chirp.Body,
+				UserID:    chirp.UserID,
+				CreatedAt: chirp.CreatedAt,
+				UpdatedAt: chirp.UpdatedAt,
+			},
+		)
+	}
+
+	respondWithJSON(collection.elements, http.StatusOK, w)
+}
+
 func (cfg *apiConfig) postChirp(w http.ResponseWriter, req *http.Request) {
 	params := chirpParams{}
 	err := json.NewDecoder(req.Body).Decode(&params)
@@ -40,7 +66,6 @@ func (cfg *apiConfig) postChirp(w http.ResponseWriter, req *http.Request) {
 		log.Printf("Error: could not decode JSON: %v\n", err)
 		respondWithErr(err, http.StatusInternalServerError, w)
 	}
-	fmt.Printf("Params: %+v\n", params)
 
 	err = validateChirp(params)
 	if err != nil {

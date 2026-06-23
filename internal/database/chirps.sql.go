@@ -11,6 +11,39 @@ import (
 	"github.com/google/uuid"
 )
 
+const allChirps = `-- name: AllChirps :many
+SELECT id, body, user_id, created_at, updated_at FROM chirps ORDER BY created_at
+`
+
+func (q *Queries) AllChirps(ctx context.Context) ([]Chirp, error) {
+	rows, err := q.db.QueryContext(ctx, allChirps)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Chirp
+	for rows.Next() {
+		var i Chirp
+		if err := rows.Scan(
+			&i.ID,
+			&i.Body,
+			&i.UserID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const createChirp = `-- name: CreateChirp :one
 INSERT INTO chirps (id, body, user_id, created_at, updated_at)
 VALUES (

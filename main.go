@@ -65,6 +65,8 @@ func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
 
 	mux.HandleFunc("GET /api/healthz", healthz)
 	mux.HandleFunc("POST /api/users", cfg.postUser)
+
+	mux.HandleFunc("GET /api/chirps", cfg.chirps)
 	mux.HandleFunc("POST /api/chirps", cfg.postChirp)
 }
 
