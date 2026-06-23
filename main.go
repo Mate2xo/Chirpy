@@ -15,13 +15,14 @@ import (
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
+	platform       string
 }
 
 const port = "8080"
 
 func main() {
-	godotenv.Load()
 	cfg := &apiConfig{}
+	initENV(cfg)
 	server := initServer(cfg)
 	db := initDB(cfg)
 	defer db.Close()
@@ -49,6 +50,11 @@ func initDB(cfg *apiConfig) *sql.DB {
 	cfg.dbQueries = dbQueries
 
 	return db
+}
+
+func initENV(cfg *apiConfig) {
+	godotenv.Load()
+	cfg.platform = os.Getenv("PLATFORM")
 }
 
 func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
