@@ -29,7 +29,6 @@ func (cfg *apiConfig) postUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	params.ID = uuid.New()
-	fmt.Printf("-- Params: %+v\n", params)
 
 	user, err := cfg.dbQueries.CreateUser(context.Background(), params)
 	if err != nil {
