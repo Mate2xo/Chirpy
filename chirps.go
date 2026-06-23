@@ -59,6 +59,30 @@ func (cfg *apiConfig) chirps(w http.ResponseWriter, req *http.Request) {
 	respondWithJSON(collection.elements, http.StatusOK, w)
 }
 
+func (cfg *apiConfig) chirp(w http.ResponseWriter, req *http.Request) {
+	id, err := uuid.Parse(req.PathValue("id"))
+	if err != nil {
+		respondWithErr(err, http.StatusInternalServerError, w)
+		return
+	}
+
+	chirp, err := cfg.dbQueries.GetChirp(req.Context(), id)
+	if err != nil {
+		respondWithErr(err, http.StatusNotFound, w)
+		return
+	}
+
+	member := chirpResponse{
+		ID:        chirp.ID,
+		Body:      chirp.Body,
+		UserID:    chirp.UserID,
+		CreatedAt: chirp.CreatedAt,
+		UpdatedAt: chirp.UpdatedAt,
+	}
+
+	respondWithJSON(member, http.StatusOK, w)
+}
+
 func (cfg *apiConfig) postChirp(w http.ResponseWriter, req *http.Request) {
 	params := chirpParams{}
 	err := json.NewDecoder(req.Body).Decode(&params)
