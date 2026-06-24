@@ -1,6 +1,16 @@
 package auth
 
-import "github.com/alexedwards/argon2id"
+import (
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/alexedwards/argon2id"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+)
+
+const tokenIssuer = "chirpy-access"
 
 func HashPassword(password string) (string, error) {
 	hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
@@ -16,4 +26,47 @@ func CheckPasswordHash(password string, hash string) (bool, error) {
 		return false, err
 	}
 	return match, nil
+}
+
+func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Issuer:    tokenIssuer,
+		IssuedAt:  jwt.NewNumericDate(time.Now().Local()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(expiresIn)),
+		Subject:   userID.String(),
+	})
+
+	signed, err := token.SignedString([]byte(tokenSecret))
+	if err != nil {
+		return "", fmt.Errorf("could not sign JWT: %w", err)
+	}
+
+	return signed, nil
+}
+
+func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&jwt.RegisteredClaims{},
+		func(t *jwt.Token) (any, error) { return []byte(tokenSecret), nil },
+	)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("unparsable token: %w", err)
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok {
+		return uuid.UUID{}, fmt.Errorf("unretrievable Claims: %w", err)
+	}
+
+	if claims.Issuer != tokenIssuer {
+		return uuid.UUID{}, errors.New("invalid issuer")
+	}
+
+	id, err := uuid.Parse(claims.Subject)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("invalid uuid: %w", err)
+	}
+
+	return id, nil
 }
