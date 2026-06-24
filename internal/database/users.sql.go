@@ -7,29 +7,64 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, email, created_at, updated_at)
-VALUES ($1, $2, NOW(), NOW())
-RETURNING id, created_at, updated_at, email
+INSERT INTO users (id, email, hashed_password, created_at, updated_at)
+VALUES (gen_random_uuid(), $1, $2, NOW(), NOW())
+RETURNING id, email, hashed_password, created_at
 `
 
 type CreateUserParams struct {
-	ID    uuid.UUID
-	Email string
+	Email          string
+	HashedPassword string
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.ID, arg.Email)
-	var i User
+type CreateUserRow struct {
+	ID             uuid.UUID
+	Email          string
+	HashedPassword string
+	CreatedAt      time.Time
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.HashedPassword)
+	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
+		&i.Email,
+		&i.HashedPassword,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, email, hashed_password, created_at, updated_at
+FROM users
+WHERE email = $1
+`
+
+type GetUserByEmailRow struct {
+	ID             uuid.UUID
+	Email          string
+	HashedPassword string
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i GetUserByEmailRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.HashedPassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Email,
 	)
 	return i, err
 }
