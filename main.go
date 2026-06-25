@@ -16,6 +16,7 @@ type apiConfig struct {
 	fileserverHits atomic.Int32
 	dbQueries      *database.Queries
 	platform       string
+	jwtSecret      string
 }
 
 const port = "8080"
@@ -55,6 +56,7 @@ func initDB(cfg *apiConfig) *sql.DB {
 func initENV(cfg *apiConfig) {
 	godotenv.Load()
 	cfg.platform = os.Getenv("PLATFORM")
+	cfg.jwtSecret = os.Getenv("JWT_SECRET")
 }
 
 func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {

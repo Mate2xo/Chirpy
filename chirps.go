@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/Mate2xo/Chirpy/internal/auth"
 	"github.com/Mate2xo/Chirpy/internal/database"
 	"github.com/google/uuid"
 )
@@ -91,6 +92,16 @@ func (cfg *apiConfig) postChirp(w http.ResponseWriter, req *http.Request) {
 		respondWithErr(err, http.StatusInternalServerError, w)
 	}
 
+	jwt, err := auth.GetBearerToken(req.Header)
+	if err != nil {
+		respondWithErr(err, http.StatusUnauthorized, w)
+	}
+	userID, err := auth.ValidateJWT(jwt, cfg.jwtSecret)
+	if err != nil {
+		respondWithErr(err, http.StatusUnauthorized, w)
+		return
+	}
+
 	err = validateChirp(params)
 	if err != nil {
 		respondWithErr(err, http.StatusBadRequest, w)
@@ -101,7 +112,7 @@ func (cfg *apiConfig) postChirp(w http.ResponseWriter, req *http.Request) {
 		respondWithErr(err, http.StatusInternalServerError, w)
 	}
 
-	createParams := database.CreateChirpParams{Body: cleaned, UserID: params.UserID}
+	createParams := database.CreateChirpParams{Body: cleaned, UserID: userID}
 	chirp, err := cfg.dbQueries.CreateChirp(req.Context(), createParams)
 	if err != nil {
 		respondWithErr(err, http.StatusInternalServerError, w)

@@ -19,10 +19,12 @@ type UserResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 	Email     string    `json:"email"`
+	Token     string    `json:"token"`
 }
 type userParams struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email            string `json:"email"`
+	Password         string `json:"password"`
+	ExpiresInSeconds int    `json:"expires_in_seconds,omitempty"`
 }
 
 func (cfg *apiConfig) postUser(w http.ResponseWriter, req *http.Request) {
@@ -81,11 +83,24 @@ func (cfg *apiConfig) loginUser(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	expirationTime := time.Hour
+	const hourInSeconds = 3600
+	if params.ExpiresInSeconds > 0 || params.ExpiresInSeconds < hourInSeconds {
+		expirationTime = time.Duration(params.ExpiresInSeconds) * time.Second
+	}
+
+	token, err := auth.MakeJWT(user.ID, cfg.jwtSecret, expirationTime)
+	if err != nil {
+		respondWithErr(err, http.StatusInternalServerError, w)
+		return
+	}
+
 	payload := UserResponse{
 		ID:        user.ID,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 		Email:     user.Email,
+		Token:     token,
 	}
 	respondWithJSON(payload, http.StatusOK, w)
 }
