@@ -70,6 +70,7 @@ func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
 	mux.HandleFunc("POST /api/login", cfg.loginUser)
 	mux.HandleFunc("POST /api/refresh", cfg.refreshUser)
 	mux.HandleFunc("POST /api/revoke", cfg.revokeUser)
+
 	mux.HandleFunc("POST /api/users", cfg.postUser)
 
 	mux.HandleFunc("GET /api/chirps", cfg.chirps)
