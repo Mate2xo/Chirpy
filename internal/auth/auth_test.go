@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/Mate2xo/Chirpy/internal/auth"
 	"github.com/google/uuid"
@@ -12,7 +11,7 @@ import (
 
 func TestValidateJWT(t *testing.T) {
 	id := uuid.New()
-	validTokenString, _ := auth.MakeJWT(id, "sekret", time.Minute)
+	validTokenString, _ := auth.MakeJWT(id, "sekret")
 	validSecret := "sekret"
 
 	tests := []struct {
@@ -61,7 +60,7 @@ func TestValidateJWT(t *testing.T) {
 }
 
 func TestGetBearerToken(t *testing.T) {
-	validTokenString, _ := auth.MakeJWT(uuid.New(), "sekret", time.Minute)
+	validTokenString, _ := auth.MakeJWT(uuid.New(), "sekret")
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -78,13 +77,13 @@ func TestGetBearerToken(t *testing.T) {
 		{
 			name:    "errors when there is no Authorization header",
 			headers: http.Header{"Chicken": []string{"Nanban"}},
-			want:    validTokenString,
+			want:    "",
 			wantErr: true,
 		},
 		{
 			name:    "errors when the Authorization header does not contain a 'Bearer' token",
 			headers: http.Header{"Authorization": []string{"What is Love"}},
-			want:    validTokenString,
+			want:    "",
 			wantErr: true,
 		},
 	}
