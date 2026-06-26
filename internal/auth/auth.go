@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -30,11 +32,11 @@ func CheckPasswordHash(password string, hash string) (bool, error) {
 	return match, nil
 }
 
-func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
+func MakeJWT(userID uuid.UUID, tokenSecret string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    tokenIssuer,
 		IssuedAt:  jwt.NewNumericDate(time.Now().Local()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(expiresIn)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Local().Add(time.Hour)),
 		Subject:   userID.String(),
 	})
 
@@ -44,6 +46,12 @@ func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (str
 	}
 
 	return signed, nil
+}
+
+func MakeRefrehToken() string {
+	key := make([]byte, 32)
+	rand.Read(key)
+	return hex.EncodeToString(key)
 }
 
 func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
