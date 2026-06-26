@@ -45,7 +45,7 @@ func (cfg *apiConfig) loginUser(w http.ResponseWriter, req *http.Request) {
 	}
 
 	payload := UserResponse{
-		User: database.User{
+		User: User{
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,

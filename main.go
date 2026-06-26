@@ -72,6 +72,7 @@ func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
 	mux.HandleFunc("POST /api/revoke", cfg.revokeUser)
 
 	mux.HandleFunc("POST /api/users", cfg.createUser)
+	mux.HandleFunc("PUT /api/users", cfg.updateUser)
 
 	mux.HandleFunc("GET /api/chirps", cfg.chirps)
 	mux.HandleFunc("GET /api/chirps/{id}", cfg.chirp)
