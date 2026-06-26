@@ -61,8 +61,10 @@ func (q *Queries) GetRefreshToken(ctx context.Context, token string) (RefreshTok
 const getUserByRefreshToken = `-- name: GetUserByRefreshToken :one
 SELECT id, email, created_at, updated_at
   FROM users
-  WHERE id = (SELECT user_id FROM refresh_tokens
-                WHERE token = $1 AND revoked_at IS NULL)
+  WHERE id = (
+    SELECT user_id FROM refresh_tokens
+      WHERE token = $1 AND revoked_at IS NULL
+  )
 `
 
 type GetUserByRefreshTokenRow struct {
