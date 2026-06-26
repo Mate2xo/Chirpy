@@ -21,7 +21,7 @@ type userParams struct {
 	Password string `json:"password"`
 }
 
-func (cfg *apiConfig) postUser(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) createUser(w http.ResponseWriter, req *http.Request) {
 	params := userParams{}
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&params)
