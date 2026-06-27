@@ -67,9 +67,9 @@ func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
 
 	mux.HandleFunc("GET /api/healthz", healthz)
 
-	mux.HandleFunc("POST /api/login", cfg.loginUser)
-	mux.HandleFunc("POST /api/refresh", cfg.refreshUser)
-	mux.HandleFunc("POST /api/revoke", cfg.revokeUser)
+	mux.HandleFunc("POST /api/login", cfg.createSession)
+	mux.HandleFunc("POST /api/refresh", cfg.refreshSession)
+	mux.HandleFunc("POST /api/revoke", cfg.deleteSession)
 
 	mux.HandleFunc("POST /api/users", cfg.createUser)
 	mux.HandleFunc("PUT /api/users", cfg.updateUser)

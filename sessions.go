@@ -10,7 +10,7 @@ import (
 	"github.com/Mate2xo/Chirpy/internal/database"
 )
 
-func (cfg *apiConfig) loginUser(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) createSession(w http.ResponseWriter, req *http.Request) {
 	params := userParams{}
 	err := json.NewDecoder(req.Body).Decode(&params)
 	if err != nil {
@@ -58,7 +58,7 @@ func (cfg *apiConfig) loginUser(w http.ResponseWriter, req *http.Request) {
 	respondWithJSON(payload, http.StatusOK, w)
 }
 
-func (cfg *apiConfig) refreshUser(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) refreshSession(w http.ResponseWriter, req *http.Request) {
 	refreshToken, err := auth.GetBearerToken(req.Header)
 	if err != nil {
 		respondWithErr(err, http.StatusBadRequest, w)
@@ -81,7 +81,7 @@ func (cfg *apiConfig) refreshUser(w http.ResponseWriter, req *http.Request) {
 	respondWithJSON(payload, http.StatusOK, w)
 }
 
-func (cfg *apiConfig) revokeUser(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) deleteSession(w http.ResponseWriter, req *http.Request) {
 	refreshToken, err := auth.GetBearerToken(req.Header)
 	if err != nil {
 		respondWithErr(err, http.StatusBadRequest, w)
