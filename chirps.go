@@ -128,6 +128,43 @@ func (cfg *apiConfig) createChirp(w http.ResponseWriter, req *http.Request) {
 	respondWithJSON(response, http.StatusCreated, w)
 }
 
+func (cfg *apiConfig) deleteChirp(w http.ResponseWriter, req *http.Request) {
+	id, err := uuid.Parse(req.PathValue("id"))
+	if err != nil {
+		respondWithErr(err, http.StatusBadRequest, w)
+		return
+	}
+
+	bearerToken, err := auth.GetBearerToken(req.Header)
+	if err != nil {
+		respondWithErr(err, http.StatusUnauthorized, w)
+		return
+	}
+	currentUserID, err := auth.ValidateJWT(bearerToken, cfg.jwtSecret)
+	if err != nil {
+		respondWithErr(err, http.StatusUnauthorized, w)
+		return
+	}
+
+	chirp, err := cfg.dbQueries.GetChirp(req.Context(), id)
+	if err != nil {
+		respondWithErr(err, http.StatusNotFound, w)
+		return
+	}
+	if currentUserID != chirp.UserID {
+		respondWithErr(err, http.StatusForbidden, w)
+		return
+	}
+
+	err = cfg.dbQueries.DeleteChrip(req.Context(), id)
+	if err != nil {
+		respondWithErr(err, http.StatusInternalServerError, w)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func validateChirp(params chirpParams) error {
 	const maxChirpLength = 140
 	if length := len(params.Body); length > maxChirpLength {
