@@ -38,7 +38,7 @@ type chirpsResponse struct {
 	elements []chirpResponse
 }
 
-func (cfg *apiConfig) chirps(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) indexChirps(w http.ResponseWriter, req *http.Request) {
 	chirps, err := cfg.dbQueries.AllChirps(req.Context())
 	if err != nil {
 		respondWithErr(err, http.StatusInternalServerError, w)
@@ -60,7 +60,7 @@ func (cfg *apiConfig) chirps(w http.ResponseWriter, req *http.Request) {
 	respondWithJSON(collection.elements, http.StatusOK, w)
 }
 
-func (cfg *apiConfig) chirp(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) showChirp(w http.ResponseWriter, req *http.Request) {
 	id, err := uuid.Parse(req.PathValue("id"))
 	if err != nil {
 		respondWithErr(err, http.StatusInternalServerError, w)
@@ -84,7 +84,7 @@ func (cfg *apiConfig) chirp(w http.ResponseWriter, req *http.Request) {
 	respondWithJSON(member, http.StatusOK, w)
 }
 
-func (cfg *apiConfig) postChirp(w http.ResponseWriter, req *http.Request) {
+func (cfg *apiConfig) createChirp(w http.ResponseWriter, req *http.Request) {
 	params := chirpParams{}
 	err := json.NewDecoder(req.Body).Decode(&params)
 	if err != nil {

@@ -74,9 +74,9 @@ func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
 	mux.HandleFunc("POST /api/users", cfg.createUser)
 	mux.HandleFunc("PUT /api/users", cfg.updateUser)
 
-	mux.HandleFunc("GET /api/chirps", cfg.chirps)
-	mux.HandleFunc("GET /api/chirps/{id}", cfg.chirp)
-	mux.HandleFunc("POST /api/chirps", cfg.postChirp)
+	mux.HandleFunc("GET /api/chirps", cfg.indexChirps)
+	mux.HandleFunc("GET /api/chirps/{id}", cfg.showChirp)
+	mux.HandleFunc("POST /api/chirps", cfg.createChirp)
 }
 
 var fileRoot = http.StripPrefix("/app/", http.FileServer(http.Dir(".")))
