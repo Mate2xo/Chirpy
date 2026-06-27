@@ -14,11 +14,12 @@ import (
 )
 
 type User struct {
-	ID             uuid.UUID `json:"id"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
 	Email          string    `json:"email"`
 	HashedPassword string    `json:"password"`
+	ID             uuid.UUID `json:"id"`
+	IsChirpyRed    bool      `json:"is_chirpy_red"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
 }
 type UserResponse struct {
 	User
@@ -58,9 +59,10 @@ func (cfg *apiConfig) createUser(w http.ResponseWriter, req *http.Request) {
 
 	userResponse := UserResponse{
 		User: User{
-			ID:        user.ID,
-			CreatedAt: user.CreatedAt,
-			Email:     user.Email,
+			ID:          user.ID,
+			Email:       user.Email,
+			IsChirpyRed: false,
+			CreatedAt:   user.CreatedAt,
 		},
 	}
 
@@ -108,10 +110,11 @@ func (cfg *apiConfig) updateUser(w http.ResponseWriter, req *http.Request) {
 
 	payload := UserResponse{
 		User: User{
-			ID:        user.ID,
-			Email:     user.Email,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
+			ID:          user.ID,
+			Email:       user.Email,
+			IsChirpyRed: user.IsChirpyRed,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   user.UpdatedAt,
 		},
 	}
 	respondWithJSON(payload, http.StatusOK, w)

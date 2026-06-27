@@ -46,10 +46,11 @@ func (cfg *apiConfig) loginUser(w http.ResponseWriter, req *http.Request) {
 
 	payload := UserResponse{
 		User: User{
-			ID:        user.ID,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-			Email:     user.Email,
+			ID:          user.ID,
+			Email:       user.Email,
+			IsChirpyRed: user.IsChirpyRed,
+			CreatedAt:   user.CreatedAt,
+			UpdatedAt:   user.UpdatedAt,
 		},
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken.Token,

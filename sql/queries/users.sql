@@ -9,7 +9,12 @@ UPDATE users
   WHERE id = $3
 RETURNING *;
 
+-- name: UpgradeUser :exec
+UPDATE users
+  SET is_chirpy_red = true, updated_at = NOW()
+  WHERE id = $1;
+
 -- name: GetUserByEmail :one
-SELECT id, email, hashed_password, created_at, updated_at
+SELECT *
 FROM users
 WHERE email = $1;
