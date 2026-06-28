@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/Mate2xo/Chirpy/internal/auth"
 	"github.com/google/uuid"
 )
 
@@ -15,8 +16,14 @@ func (cfg *apiConfig) upgradeUserHook(w http.ResponseWriter, req *http.Request) 
 		}
 	}
 
+	apiKey, err := auth.GetAPIKey(req.Header)
+	if err != nil || apiKey != cfg.polkaKey {
+		respondWithErr(err, http.StatusUnauthorized, w)
+		return
+	}
+
 	params := parameters{}
-	err := json.NewDecoder(req.Body).Decode(&params)
+	err = json.NewDecoder(req.Body).Decode(&params)
 	if err != nil {
 		respondWithErr(err, http.StatusBadRequest, w)
 		return

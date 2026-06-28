@@ -17,6 +17,7 @@ type apiConfig struct {
 	dbQueries      *database.Queries
 	platform       string
 	jwtSecret      string
+	polkaKey       string
 }
 
 const port = "8080"
@@ -57,6 +58,7 @@ func initENV(cfg *apiConfig) {
 	godotenv.Load()
 	cfg.platform = os.Getenv("PLATFORM")
 	cfg.jwtSecret = os.Getenv("JWT_SECRET")
+	cfg.polkaKey = os.Getenv("POLKA_KEY")
 }
 
 func registerRoutes(mux *http.ServeMux, cfg *apiConfig) {
