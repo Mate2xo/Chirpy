@@ -40,8 +40,8 @@ type chirpsResponse struct {
 
 func (cfg *apiConfig) indexChirps(w http.ResponseWriter, req *http.Request) {
 	queryParams := req.URL.Query()
-	var authorID uuid.NullUUID
 
+	var authorID uuid.NullUUID
 	if authorParam := queryParams.Get("author_id"); authorParam != "" {
 		parsed, err := uuid.Parse(authorParam)
 		if err != nil {
@@ -52,7 +52,13 @@ func (cfg *apiConfig) indexChirps(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	chirps, err := cfg.dbQueries.AllChirps(req.Context(), authorID)
+	descendent := false
+	if orderParam := queryParams.Get("sort"); orderParam != "" {
+		descendent = orderParam == "desc"
+	}
+
+	queryArgs := database.AllChirpsParams{UserID: authorID, Reverse: descendent}
+	chirps, err := cfg.dbQueries.AllChirps(req.Context(), queryArgs)
 	if err != nil {
 		respondWithErr(err, http.StatusInternalServerError, w)
 		return

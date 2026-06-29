@@ -14,11 +14,18 @@ import (
 const allChirps = `-- name: AllChirps :many
 SELECT id, body, user_id, created_at, updated_at FROM chirps
   WHERE ($1::uuid IS NULL OR user_id = $1::uuid)
-  ORDER BY created_at
+  ORDER BY
+    CASE WHEN NOT $2::boolean THEN created_at END ASC,
+    CASE WHEN $2::boolean  THEN created_at END  DESC
 `
 
-func (q *Queries) AllChirps(ctx context.Context, userID uuid.NullUUID) ([]Chirp, error) {
-	rows, err := q.db.QueryContext(ctx, allChirps, userID)
+type AllChirpsParams struct {
+	UserID  uuid.NullUUID
+	Reverse bool
+}
+
+func (q *Queries) AllChirps(ctx context.Context, arg AllChirpsParams) ([]Chirp, error) {
+	rows, err := q.db.QueryContext(ctx, allChirps, arg.UserID, arg.Reverse)
 	if err != nil {
 		return nil, err
 	}
