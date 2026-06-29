@@ -10,7 +10,9 @@ VALUES (
 RETURNING *;
 
 -- name: AllChirps :many
-SELECT * FROM chirps ORDER BY created_at;
+SELECT * FROM chirps
+  WHERE (sqlc.narg('user_id')::uuid IS NULL OR user_id = sqlc.narg('user_id')::uuid)
+  ORDER BY created_at;
 
 -- name: GetChirp :one
 SELECT * FROM chirps WHERE id = $1;

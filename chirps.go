@@ -39,9 +39,23 @@ type chirpsResponse struct {
 }
 
 func (cfg *apiConfig) indexChirps(w http.ResponseWriter, req *http.Request) {
-	chirps, err := cfg.dbQueries.AllChirps(req.Context())
+	queryParams := req.URL.Query()
+	var authorID uuid.NullUUID
+
+	if authorParam := queryParams.Get("author_id"); authorParam != "" {
+		parsed, err := uuid.Parse(authorParam)
+		if err != nil {
+			log.Printf(":> error parsing `author_id` param: %v", err)
+		} else {
+			authorID.UUID = parsed
+			authorID.Valid = true
+		}
+	}
+
+	chirps, err := cfg.dbQueries.AllChirps(req.Context(), authorID)
 	if err != nil {
 		respondWithErr(err, http.StatusInternalServerError, w)
+		return
 	}
 
 	collection := chirpsResponse{}

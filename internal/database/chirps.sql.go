@@ -12,11 +12,13 @@ import (
 )
 
 const allChirps = `-- name: AllChirps :many
-SELECT id, body, user_id, created_at, updated_at FROM chirps ORDER BY created_at
+SELECT id, body, user_id, created_at, updated_at FROM chirps
+  WHERE ($1::uuid IS NULL OR user_id = $1::uuid)
+  ORDER BY created_at
 `
 
-func (q *Queries) AllChirps(ctx context.Context) ([]Chirp, error) {
-	rows, err := q.db.QueryContext(ctx, allChirps)
+func (q *Queries) AllChirps(ctx context.Context, userID uuid.NullUUID) ([]Chirp, error) {
+	rows, err := q.db.QueryContext(ctx, allChirps, userID)
 	if err != nil {
 		return nil, err
 	}
